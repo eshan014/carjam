@@ -52,3 +52,12 @@ func coast_drag() -> float:
 
 func parking_drag() -> float:
 	return park_brake_force / mass
+
+
+static func by_name(type_name: String) -> CarParams:
+	match type_name:
+		"compact":
+			return compact()
+		"truck":
+			return truck()
+	return null

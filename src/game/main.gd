@@ -1,17 +1,15 @@
 extends Node2D
-## Prototype puzzle. W/A/S/D or arrows drive, 1-4 pick the car, R resets.
-## Get the blue car into the green zone.
+## Prototype player. W/A/S/D or arrows drive, 1-9 pick the car, R reloads the level.
+## Get the blue (primary) car into the green zone.
 
-const ARENA_CENTER := Vector2(576, 324)
-const ARENA_HALF := Vector2(500, 180)
-const WALL_THICKNESS := 20.0
-const CAR_COLORS: Array[Color] = [
-	Color.STEEL_BLUE, Color.SEA_GREEN, Color.INDIAN_RED, Color.DARK_ORANGE
-]
+const LEVEL_PATH := "res://levels/level_01.json"
+const PRIMARY_COLOR := Color.STEEL_BLUE
+const OTHER_COLORS: Array[Color] = [Color.SEA_GREEN, Color.INDIAN_RED, Color.DARK_ORANGE]
 const GOAL_COLOR := Color(0.2, 0.9, 0.3, 0.35)
 
-var _world: SimWorld
-var _driven: SimCar
+var _world: SimWorld = null
+var _driven: SimCar = null
+var _error := ""
 
 
 func _ready() -> void:
@@ -21,7 +19,9 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	if Input.is_physical_key_pressed(KEY_R):
 		_reset()
-	for number in range(_world.cars.size()):
+	if _world == null:
+		return
+	for number in range(mini(_world.cars.size(), 9)):
 		if Input.is_physical_key_pressed((KEY_1 + number) as Key):
 			_driven = _world.cars[number]
 
@@ -36,12 +36,19 @@ func _physics_process(delta: float) -> void:
 
 
 func _draw() -> void:
+	if _world == null:
+		draw_set_transform(Vector2.ZERO, 0.0)
+		_draw_text(_error, Color.TOMATO)
+		return
 	_draw_box(_world.goal, GOAL_COLOR)
 	for wall in _world.walls:
 		_draw_box(wall, Color.DIM_GRAY)
 	for i in range(_world.cars.size()):
 		var car := _world.cars[i]
-		_draw_box(car.box(), CAR_COLORS[i])
+		var color := (
+			PRIMARY_COLOR if car == _world.primary else OTHER_COLORS[i % OTHER_COLORS.size()]
+		)
+		_draw_box(car.box(), color)
 		var half := car.box().half_size
 		# Yellow block marks the front of the car.
 		draw_rect(Rect2(Vector2(half.x - 15.0, -half.y), Vector2(15.0, half.y * 2.0)), Color.GOLD)
@@ -49,15 +56,7 @@ func _draw() -> void:
 			draw_rect(Rect2(-half, half * 2.0), Color.WHITE, false, 3.0)
 	if _world.is_won():
 		draw_set_transform(Vector2.ZERO, 0.0)
-		draw_string(
-			ThemeDB.fallback_font,
-			Vector2(40.0, 50.0),
-			"SOLVED! Press R to reset",
-			HORIZONTAL_ALIGNMENT_LEFT,
-			-1.0,
-			32,
-			Color.WHITE
-		)
+		_draw_text("SOLVED! Press R to reset", Color.WHITE)
 
 
 func _draw_box(box: OrientedBox, color: Color) -> void:
@@ -65,26 +64,18 @@ func _draw_box(box: OrientedBox, color: Color) -> void:
 	draw_rect(Rect2(-box.half_size, box.half_size * 2.0), color)
 
 
-func _reset() -> void:
-	_world = SimWorld.new()
-	var half_thick := WALL_THICKNESS / 2.0
-	var wide := Vector2(ARENA_HALF.x + WALL_THICKNESS, half_thick)
-	var tall := Vector2(half_thick, ARENA_HALF.y + WALL_THICKNESS)
-	var edge_x := ARENA_HALF.x + half_thick
-	var edge_y := ARENA_HALF.y + half_thick
-	_world.add_wall(OrientedBox.make(ARENA_CENTER + Vector2(0, -edge_y), 0.0, wide))
-	_world.add_wall(OrientedBox.make(ARENA_CENTER + Vector2(0, edge_y), 0.0, wide))
-	_world.add_wall(OrientedBox.make(ARENA_CENTER + Vector2(-edge_x, 0), 0.0, tall))
-	_world.add_wall(OrientedBox.make(ARENA_CENTER + Vector2(edge_x, 0), 0.0, tall))
+func _draw_text(text: String, color: Color) -> void:
+	draw_string(
+		ThemeDB.fallback_font, Vector2(40.0, 50.0), text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 32, color
+	)
 
-	var primary := SimCar.make(ARENA_CENTER + Vector2(-380, 0), 0.0, CarParams.compact())
-	_world.add_car(primary)
-	_world.primary = primary
-	_world.add_car(SimCar.make(ARENA_CENTER + Vector2(0, -100), PI / 2.0, CarParams.truck()))
-	_world.add_car(SimCar.make(ARENA_CENTER + Vector2(0, 25), PI / 2.0, CarParams.compact()))
-	_world.add_car(SimCar.make(ARENA_CENTER + Vector2(0, 115), PI / 2.0, CarParams.compact()))
-	_world.goal = OrientedBox.make(ARENA_CENTER + Vector2(440, 0), 0.0, Vector2(50, ARENA_HALF.y))
-	_driven = primary
+
+func _reset() -> void:
+	var result := LevelLoader.from_file(LEVEL_PATH)
+	_world = result.world
+	_error = result.error
+	_driven = null if _world == null else _world.primary
+	queue_redraw()
 
 
 func _axis(negative: Key, positive: Key) -> float:

@@ -1,0 +1,12 @@
+{
+	"name": "First Gap",
+	"arena": { "center": [576, 324], "half": [500, 180] },
+	"goal": { "center": [1016, 324], "half": [50, 180] },
+	"walls": [],
+	"cars": [
+		{ "type": "compact", "position": [196, 324], "heading": 0, "primary": true },
+		{ "type": "truck", "position": [576, 224], "heading": 90 },
+		{ "type": "compact", "position": [576, 349], "heading": 90 },
+		{ "type": "compact", "position": [576, 439], "heading": 90 }
+	]
+}
