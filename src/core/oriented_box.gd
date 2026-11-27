@@ -25,6 +25,11 @@ func axis_y() -> Vector2:
 	return axis_x().orthogonal()
 
 
+func contains_point(point: Vector2) -> bool:
+	var offset := point - center
+	return absf(offset.dot(axis_x())) <= half_size.x and absf(offset.dot(axis_y())) <= half_size.y
+
+
 ## Half the width of this box when seen along a unit-length direction.
 func radius_on(direction: Vector2) -> float:
 	return half_size.x * absf(direction.dot(axis_x())) + half_size.y * absf(direction.dot(axis_y()))

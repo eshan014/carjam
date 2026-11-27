@@ -1,10 +1,14 @@
 extends Node2D
-## Prototype arena. W/A/S/D or arrows drive, 1/2/3 pick the car, R resets.
+## Prototype puzzle. W/A/S/D or arrows drive, 1-4 pick the car, R resets.
+## Get the blue car into the green zone.
 
 const ARENA_CENTER := Vector2(576, 324)
-const ARENA_HALF := Vector2(500, 280)
+const ARENA_HALF := Vector2(500, 180)
 const WALL_THICKNESS := 20.0
-const CAR_COLORS: Array[Color] = [Color.STEEL_BLUE, Color.INDIAN_RED, Color.SEA_GREEN]
+const CAR_COLORS: Array[Color] = [
+	Color.STEEL_BLUE, Color.SEA_GREEN, Color.INDIAN_RED, Color.DARK_ORANGE
+]
+const GOAL_COLOR := Color(0.2, 0.9, 0.3, 0.35)
 
 var _world: SimWorld
 var _driven: SimCar
@@ -32,6 +36,7 @@ func _physics_process(delta: float) -> void:
 
 
 func _draw() -> void:
+	_draw_box(_world.goal, GOAL_COLOR)
 	for wall in _world.walls:
 		_draw_box(wall, Color.DIM_GRAY)
 	for i in range(_world.cars.size()):
@@ -42,6 +47,17 @@ func _draw() -> void:
 		draw_rect(Rect2(Vector2(half.x - 15.0, -half.y), Vector2(15.0, half.y * 2.0)), Color.GOLD)
 		if car == _driven:
 			draw_rect(Rect2(-half, half * 2.0), Color.WHITE, false, 3.0)
+	if _world.is_won():
+		draw_set_transform(Vector2.ZERO, 0.0)
+		draw_string(
+			ThemeDB.fallback_font,
+			Vector2(40.0, 50.0),
+			"SOLVED! Press R to reset",
+			HORIZONTAL_ALIGNMENT_LEFT,
+			-1.0,
+			32,
+			Color.WHITE
+		)
 
 
 func _draw_box(box: OrientedBox, color: Color) -> void:
@@ -61,10 +77,14 @@ func _reset() -> void:
 	_world.add_wall(OrientedBox.make(ARENA_CENTER + Vector2(-edge_x, 0), 0.0, tall))
 	_world.add_wall(OrientedBox.make(ARENA_CENTER + Vector2(edge_x, 0), 0.0, tall))
 
-	_world.add_car(SimCar.make(ARENA_CENTER + Vector2(-300, 0), 0.0, CarParams.compact()))
-	_world.add_car(SimCar.make(ARENA_CENTER + Vector2(0, 0), 0.0, CarParams.compact()))
-	_world.add_car(SimCar.make(ARENA_CENTER + Vector2(220, 60), PI / 2.0, CarParams.truck()))
-	_driven = _world.cars[0]
+	var primary := SimCar.make(ARENA_CENTER + Vector2(-380, 0), 0.0, CarParams.compact())
+	_world.add_car(primary)
+	_world.primary = primary
+	_world.add_car(SimCar.make(ARENA_CENTER + Vector2(0, -100), PI / 2.0, CarParams.truck()))
+	_world.add_car(SimCar.make(ARENA_CENTER + Vector2(0, 25), PI / 2.0, CarParams.compact()))
+	_world.add_car(SimCar.make(ARENA_CENTER + Vector2(0, 115), PI / 2.0, CarParams.compact()))
+	_world.goal = OrientedBox.make(ARENA_CENTER + Vector2(440, 0), 0.0, Vector2(50, ARENA_HALF.y))
+	_driven = primary
 
 
 func _axis(negative: Key, positive: Key) -> float:

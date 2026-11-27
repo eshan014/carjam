@@ -6,6 +6,8 @@ const SOLVER_PASSES := 4
 
 var cars: Array[SimCar] = []
 var walls: Array[OrientedBox] = []
+var goal: OrientedBox = null
+var primary: SimCar = null
 
 
 func add_car(car: SimCar) -> void:
@@ -14,6 +16,12 @@ func add_car(car: SimCar) -> void:
 
 func add_wall(wall: OrientedBox) -> void:
 	walls.append(wall)
+
+
+func is_won() -> bool:
+	if goal == null or primary == null:
+		return false
+	return goal.contains_point(primary.state.position)
 
 
 func step(dt: float) -> void:
