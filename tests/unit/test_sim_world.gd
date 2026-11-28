@@ -85,3 +85,26 @@ func test_off_center_push_spins_car() -> void:
 	truck.input = CarInput.make(1.0, 0.0)
 	_run(2.5)
 	assert_gt(compact.state.heading, 0.05)
+
+
+func test_car_starts_with_full_tank() -> void:
+	var car := _add_car(0, 0, 0.0, CarParams.truck())
+	assert_eq(car.state.fuel, 200.0)
+
+
+func test_lost_when_every_car_is_out_of_fuel() -> void:
+	var first := _add_car(0, 0, 0.0, CarParams.compact())
+	var second := _add_car(300, 0, 0.0, CarParams.compact())
+	first.state.fuel = 0.0
+	assert_false(_world.is_lost())
+	second.state.fuel = 0.0
+	assert_true(_world.is_lost())
+
+
+func test_won_level_is_never_lost() -> void:
+	var car := _add_car(0, 0, 0.0, CarParams.compact())
+	car.state.fuel = 0.0
+	_world.primary = car
+	_world.goal = OrientedBox.make(Vector2.ZERO, 0.0, Vector2(50, 50))
+	assert_true(_world.is_won())
+	assert_false(_world.is_lost())

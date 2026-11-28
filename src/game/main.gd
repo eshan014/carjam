@@ -54,9 +54,12 @@ func _draw() -> void:
 		draw_rect(Rect2(Vector2(half.x - 15.0, -half.y), Vector2(15.0, half.y * 2.0)), Color.GOLD)
 		if car == _driven:
 			draw_rect(Rect2(-half, half * 2.0), Color.WHITE, false, 3.0)
-	if _world.is_won():
 		draw_set_transform(Vector2.ZERO, 0.0)
-		_draw_text("SOLVED! Press R to reset", Color.WHITE)
+		_draw_fuel_bar()
+		if _world.is_won():
+			_draw_text("SOLVED! Press R to reset", Color.WHITE)
+		elif _world.is_lost():
+			_draw_text("OUT OF FUEL. Press R to retry", Color.TOMATO)
 
 
 func _draw_box(box: OrientedBox, color: Color) -> void:
@@ -68,6 +71,15 @@ func _draw_text(text: String, color: Color) -> void:
 	draw_string(
 		ThemeDB.fallback_font, Vector2(40.0, 50.0), text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 32, color
 	)
+
+
+func _draw_fuel_bar() -> void:
+	var fraction := clampf(_driven.state.fuel / _driven.params.fuel_capacity, 0.0, 1.0)
+	var bar := Rect2(Vector2(40.0, 70.0), Vector2(240.0, 16.0))
+	draw_rect(bar, Color(0.0, 0.0, 0.0, 0.5))
+	var color := Color.GOLD if fraction > 0.25 else Color.TOMATO
+	draw_rect(Rect2(bar.position, Vector2(bar.size.x * fraction, bar.size.y)), color)
+	draw_rect(bar, Color.WHITE, false, 2.0)
 
 
 func _reset() -> void:

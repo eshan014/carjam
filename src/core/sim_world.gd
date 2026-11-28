@@ -24,6 +24,16 @@ func is_won() -> bool:
 	return goal.contains_point(primary.state.position)
 
 
+## True when nothing can add energy to the puzzle any more: every car is out of fuel.
+func is_lost() -> bool:
+	if is_won() or cars.is_empty():
+		return false
+	for car in cars:
+		if car.state.fuel > 0.0:
+			return false
+	return true
+
+
 func step(dt: float) -> void:
 	for car in cars:
 		car.state = CarModel.step(car.state, car.input, car.params, dt)
