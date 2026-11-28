@@ -9,6 +9,7 @@ var brake_force: float = 400000.0
 var friction_force: float = 150000.0
 var park_brake_force: float = 100000.0
 var lateral_grip: float = 120.0
+var spin_grip: float = 6.0
 var wheelbase: float = 60.0
 var length: float = 90.0
 var width: float = 45.0
@@ -29,6 +30,7 @@ static func truck() -> CarParams:
 	result.brake_force = 900000.0
 	result.friction_force = 450000.0
 	result.park_brake_force = 300000.0
+	result.spin_grip = 4.0
 	result.wheelbase = 120.0
 	result.length = 160.0
 	result.width = 60.0
@@ -61,3 +63,8 @@ static func by_name(type_name: String) -> CarParams:
 		"truck":
 			return truck()
 	return null
+
+
+## How hard it is to spin the car around its center.
+func inertia() -> float:
+	return mass * (length * length + width * width) / 12.0

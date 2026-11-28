@@ -14,3 +14,4 @@
 
 \- 3D cartoon look, orbiting camera, renderer choice.
 
+- Export: confirm levels/*.json is included in export filters before building for phone.

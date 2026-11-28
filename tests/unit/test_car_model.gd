@@ -116,3 +116,13 @@ func test_acceleration_tapers_as_speed_rises() -> void:
 	var first_half := _run(CarState.new(), CarInput.make(1.0, 0.0), 0.5)
 	var full := _run(CarState.new(), CarInput.make(1.0, 0.0), 1.0)
 	assert_lt(full.speed - first_half.speed, first_half.speed)
+
+
+func test_impact_spin_rotates_stopped_car_then_fades() -> void:
+	var spinning := CarState.new()
+	spinning.spin = 1.0
+	var early := _run(spinning, CarInput.new(), 0.1)
+	assert_gt(early.heading, 0.0)
+	assert_eq(early.position, Vector2.ZERO)
+	var late := _run(spinning, CarInput.new(), 5.0)
+	assert_eq(late.spin, 0.0)

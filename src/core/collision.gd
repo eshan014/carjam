@@ -25,4 +25,27 @@ static func test(a: OrientedBox, b: OrientedBox) -> CollisionContact:
 	var contact := CollisionContact.new()
 	contact.normal = best_normal
 	contact.depth = best_depth
+	contact.point = _contact_point(a, b, best_normal)
 	return contact
+
+
+## Where the boxes touch: the average of every corner that sits inside the other box.
+## Rare plus-shaped overlaps have no such corner, so they use the middle of the overlap.
+static func _contact_point(a: OrientedBox, b: OrientedBox, normal: Vector2) -> Vector2:
+	var sum := Vector2.ZERO
+	var count := 0
+	for corner in a.corners():
+		if b.contains_point(corner):
+			sum += corner
+			count += 1
+	for corner in b.corners():
+		if a.contains_point(corner):
+			sum += corner
+			count += 1
+	if count > 0:
+		return sum / float(count)
+
+	var along_a := a.center.dot(normal) + a.radius_on(normal)
+	var along_b := b.center.dot(normal) - b.radius_on(normal)
+	var middle := (a.center + b.center) / 2.0
+	return middle + normal * ((along_a + along_b) / 2.0 - middle.dot(normal))

@@ -36,33 +36,37 @@ func step(dt: float) -> void:
 				_resolve_pair(cars[i], cars[j])
 
 
-# Walls never move: push the car out and cancel its speed into the wall.
+# Walls never move: push the car out, then cancel the motion of the touching point into the wall.
 func _resolve_wall(car: SimCar, wall: OrientedBox) -> void:
 	var contact := Collision.test(car.box(), wall)
 	if contact == null:
 		return
+	var offset := contact.point - car.state.position
 	car.state.position -= contact.normal * contact.depth
-	var velocity := car.velocity()
-	var into_wall := velocity.dot(contact.normal)
-	if into_wall > 0.0:
-		car.set_velocity(velocity - contact.normal * into_wall)
+	var closing := car.velocity_at(offset).dot(contact.normal)
+	if closing <= 0.0:
+		return
+	var impulse := -contact.normal * closing / car.lever_factor(offset, contact.normal)
+	car.apply_impulse(impulse, offset)
 
 
-# Separate by mass (the lighter car moves more), then share speed along the contact line.
+# Separate by mass (the lighter car moves more), then exchange a shove at the touching point.
 func _resolve_pair(a: SimCar, b: SimCar) -> void:
 	var contact := Collision.test(a.box(), b.box())
 	if contact == null:
 		return
+	var offset_a := contact.point - a.state.position
+	var offset_b := contact.point - b.state.position
 	var total_mass := a.params.mass + b.params.mass
 	a.state.position -= contact.normal * contact.depth * (b.params.mass / total_mass)
 	b.state.position += contact.normal * contact.depth * (a.params.mass / total_mass)
 
-	var a_velocity := a.velocity()
-	var b_velocity := b.velocity()
-	var a_normal := a_velocity.dot(contact.normal)
-	var b_normal := b_velocity.dot(contact.normal)
-	if b_normal - a_normal >= 0.0:
+	var closing := (b.velocity_at(offset_b) - a.velocity_at(offset_a)).dot(contact.normal)
+	if closing >= 0.0:
 		return
-	var shared := (a.params.mass * a_normal + b.params.mass * b_normal) / total_mass
-	a.set_velocity(a_velocity + contact.normal * (shared - a_normal))
-	b.set_velocity(b_velocity + contact.normal * (shared - b_normal))
+	var effective := (
+		a.lever_factor(offset_a, contact.normal) + b.lever_factor(offset_b, contact.normal)
+	)
+	var impulse := contact.normal * (-closing / effective)
+	a.apply_impulse(-impulse, offset_a)
+	b.apply_impulse(impulse, offset_b)
