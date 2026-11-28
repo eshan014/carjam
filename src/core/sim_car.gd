@@ -14,6 +14,7 @@ static func make(start: Vector2, heading: float, car_params: CarParams) -> SimCa
 	result.params = car_params
 	result.state.position = start
 	result.state.heading = heading
+	result.state.fuel = car_params.fuel_capacity
 	return result
 
 

@@ -68,7 +68,12 @@ static func _add_car(world: SimWorld, entry: Variant, index: int) -> String:
 	if not _is_number(degrees):
 		return "Car %d 'heading' must be a number (degrees)" % index
 
+	var fuel: Variant = entry.get("fuel", params.fuel_capacity)
+	if not _is_number(fuel) or float(fuel) < 0.0:
+		return "Car %d 'fuel' must be a number, 0 or more" % index
+
 	var car := SimCar.make(start, deg_to_rad(float(degrees)), params)
+	car.state.fuel = float(fuel)
 	world.add_car(car)
 	if entry.get("primary", false) == true:
 		if world.primary != null:

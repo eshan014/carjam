@@ -17,6 +17,8 @@ var max_steer: float = 0.6
 var steer_rate: float = 3.0
 var max_speed: float = 250.0
 var max_reverse_speed: float = 100.0
+var fuel_capacity: float = 100.0
+var fuel_burn: float = 5.0
 
 
 static func compact() -> CarParams:
@@ -37,6 +39,8 @@ static func truck() -> CarParams:
 	result.max_steer = 0.45
 	result.max_speed = 180.0
 	result.max_reverse_speed = 70.0
+	result.fuel_capacity = 200.0
+	result.fuel_burn = 12.0
 	return result
 
 

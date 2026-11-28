@@ -9,6 +9,7 @@ var speed: float = 0.0
 var steer: float = 0.0
 var slide: Vector2 = Vector2.ZERO
 var spin: float = 0.0
+var fuel: float = INF
 
 
 func copy() -> CarState:
@@ -19,4 +20,5 @@ func copy() -> CarState:
 	result.steer = steer
 	result.slide = slide
 	result.spin = spin
+	result.fuel = fuel
 	return result

@@ -103,3 +103,32 @@ func test_every_shipped_level_loads() -> void:
 			assert_eq(result.error, "", file_name)
 			checked += 1
 	assert_gt(checked, 0)
+
+
+func test_fuel_defaults_to_full_tank() -> void:
+	var result := LevelLoader.from_dictionary(_valid_level())
+	assert_eq(result.world.cars[0].state.fuel, 100.0)
+	assert_eq(result.world.cars[1].state.fuel, 200.0)
+
+
+func test_fuel_can_be_set_per_car() -> void:
+	var data := _valid_level()
+	data["cars"][0]["fuel"] = 40
+	var result := LevelLoader.from_dictionary(data)
+	assert_eq(result.world.cars[0].state.fuel, 40.0)
+
+
+func test_negative_fuel_is_an_error() -> void:
+	var data := _valid_level()
+	data["cars"][0]["fuel"] = -5
+	var result := LevelLoader.from_dictionary(data)
+	assert_null(result.world)
+	assert_string_contains(result.error, "fuel")
+
+
+func test_non_number_fuel_is_an_error() -> void:
+	var data := _valid_level()
+	data["cars"][0]["fuel"] = "lots"
+	var result := LevelLoader.from_dictionary(data)
+	assert_null(result.world)
+	assert_string_contains(result.error, "fuel")
