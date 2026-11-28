@@ -53,7 +53,7 @@ func test_missing_goal_is_an_error() -> void:
 
 func test_unknown_car_type_is_an_error() -> void:
 	var data := _valid_level()
-	data["cars"][1]["type"] = "bus"
+	data["cars"][1]["type"] = "hovercraft"
 	var result := LevelLoader.from_dictionary(data)
 	assert_null(result.world)
 	assert_string_contains(result.error, "unknown type")
@@ -132,3 +132,15 @@ func test_non_number_fuel_is_an_error() -> void:
 	var result := LevelLoader.from_dictionary(data)
 	assert_null(result.world)
 	assert_string_contains(result.error, "fuel")
+
+
+func test_every_vehicle_type_can_be_placed_in_a_level() -> void:
+	var data := _valid_level()
+	data["cars"] = [{"type": "compact", "position": [0, 0], "primary": true}]
+	var x := 100
+	for type_name in CarParams.type_names():
+		data["cars"].append({"type": type_name, "position": [x, 0]})
+		x += 100
+	var result := LevelLoader.from_dictionary(data)
+	assert_eq(result.error, "")
+	assert_eq(result.world.cars.size(), 1 + CarParams.type_names().size())

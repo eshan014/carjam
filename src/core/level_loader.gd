@@ -60,7 +60,8 @@ static func _add_car(world: SimWorld, entry: Variant, index: int) -> String:
 		return "Car %d must be an object" % index
 	var params := CarParams.by_name(str(entry.get("type", "")))
 	if params == null:
-		return "Car %d has unknown type (use compact or truck)" % index
+		var known := ", ".join(CarParams.type_names())
+		return "Car %d has unknown type (use one of: %s)" % [index, known]
 	var start: Variant = _vec(entry.get("position"))
 	if start == null:
 		return "Car %d needs 'position' as [x, y]" % index

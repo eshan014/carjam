@@ -1,0 +1,15 @@
+{
+	"name": "Vehicle Lot",
+	"arena": { "center": [576, 324], "half": [520, 290] },
+	"goal": { "center": [1036, 324], "half": [60, 290] },
+	"walls": [],
+	"cars": [
+		{ "type": "compact", "position": [120, 324], "heading": 0, "primary": true },
+		{ "type": "bike", "position": [300, 150], "heading": 0 },
+		{ "type": "sports", "position": [300, 500], "heading": 0 },
+		{ "type": "van", "position": [480, 110], "heading": 90 },
+		{ "type": "truck", "position": [480, 520], "heading": 90 },
+		{ "type": "bus", "position": [700, 324], "heading": 90 },
+		{ "type": "tractor", "position": [900, 180], "heading": 0 }
+	]
+}

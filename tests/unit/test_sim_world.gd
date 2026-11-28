@@ -108,3 +108,36 @@ func test_won_level_is_never_lost() -> void:
 	_world.goal = OrientedBox.make(Vector2.ZERO, 0.0, Vector2(50, 50))
 	assert_true(_world.is_won())
 	assert_false(_world.is_lost())
+
+
+func test_car_at_finds_the_car_under_a_point() -> void:
+	var first := _add_car(0, 0, 0.0, CarParams.compact())
+	var second := _add_car(300, 0, 0.0, CarParams.truck())
+	assert_eq(_world.car_at(Vector2(10, 5)), first)
+	assert_eq(_world.car_at(Vector2(300, 0)), second)
+
+
+func test_car_at_respects_rotation() -> void:
+	# The truck is 160 long and 60 wide, so turned 90 degrees it is tall, not wide.
+	var car := _add_car(0, 0, PI / 2.0, CarParams.truck())
+	assert_eq(_world.car_at(Vector2(0, 70)), car)
+	assert_null(_world.car_at(Vector2(70, 0)))
+
+
+func test_car_at_returns_null_on_empty_ground() -> void:
+	_add_car(0, 0, 0.0, CarParams.compact())
+	assert_null(_world.car_at(Vector2(500, 500)))
+
+
+func test_car_after_cycles_in_both_directions() -> void:
+	var first := _add_car(0, 0, 0.0, CarParams.compact())
+	var second := _add_car(300, 0, 0.0, CarParams.compact())
+	var third := _add_car(600, 0, 0.0, CarParams.compact())
+	assert_eq(_world.car_after(first, 1), second)
+	assert_eq(_world.car_after(third, 1), first)
+	assert_eq(_world.car_after(first, -1), third)
+	assert_eq(_world.car_after(second, -1), first)
+
+
+func test_car_after_with_no_cars_is_null() -> void:
+	assert_null(_world.car_after(null, 1))

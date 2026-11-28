@@ -34,6 +34,24 @@ func is_lost() -> bool:
 	return true
 
 
+## The car under a point, or null. Later cars win where cars overlap.
+func car_at(point: Vector2) -> SimCar:
+	for index in range(cars.size() - 1, -1, -1):
+		if cars[index].box().contains_point(point):
+			return cars[index]
+	return null
+
+
+## The car `step` places after `current` in the list, wrapping around. Use -1 for the previous.
+func car_after(current: SimCar, step: int) -> SimCar:
+	if cars.is_empty():
+		return null
+	var index := cars.find(current)
+	if index < 0:
+		return cars[0]
+	return cars[posmod(index + step, cars.size())]
+
+
 func step(dt: float) -> void:
 	for car in cars:
 		car.state = CarModel.step(car.state, car.input, car.params, dt)
