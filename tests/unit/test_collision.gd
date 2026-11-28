@@ -39,3 +39,15 @@ func test_rotated_box_overlap_depth() -> void:
 func test_rotated_thin_bars_can_miss_each_other() -> void:
 	# The bars' bounding squares overlap, but the bars themselves do not.
 	assert_null(Collision.test(_box(0, 0, 0, 50, 2), _box(40, 40, PI / 4.0, 50, 2)))
+
+
+func test_contact_point_for_corner_hit() -> void:
+	var contact := Collision.test(_box(0, 0, 0, 10, 10), _box(15, 15, 0, 10, 10))
+	assert_almost_eq(contact.point.x, 7.5, 0.001)
+	assert_almost_eq(contact.point.y, 7.5, 0.001)
+
+
+func test_contact_point_for_face_hit_is_between_the_faces() -> void:
+	var contact := Collision.test(_box(0, 0, 0, 10, 10), _box(19, 0, 0, 10, 10))
+	assert_almost_eq(contact.point.x, 9.5, 0.001)
+	assert_almost_eq(contact.point.y, 0.0, 0.001)

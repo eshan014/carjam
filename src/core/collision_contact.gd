@@ -5,3 +5,4 @@ extends RefCounted
 
 var normal: Vector2 = Vector2.ZERO
 var depth: float = 0.0
+var point: Vector2 = Vector2.ZERO

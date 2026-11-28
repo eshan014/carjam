@@ -33,3 +33,15 @@ func contains_point(point: Vector2) -> bool:
 ## Half the width of this box when seen along a unit-length direction.
 func radius_on(direction: Vector2) -> float:
 	return half_size.x * absf(direction.dot(axis_x())) + half_size.y * absf(direction.dot(axis_y()))
+
+
+func corners() -> Array[Vector2]:
+	var x_extent := axis_x() * half_size.x
+	var y_extent := axis_y() * half_size.y
+	var result: Array[Vector2] = [
+		center + x_extent + y_extent,
+		center + x_extent - y_extent,
+		center - x_extent - y_extent,
+		center - x_extent + y_extent,
+	]
+	return result

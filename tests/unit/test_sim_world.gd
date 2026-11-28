@@ -68,11 +68,20 @@ func test_overlapping_cars_get_pushed_apart() -> void:
 	assert_true(contact == null or contact.depth < 0.01)
 
 
-func test_side_push_slides_car_without_rotating() -> void:
+func test_centered_side_push_slides_car_without_spin() -> void:
 	var compact := _add_car(0, 0, 0.0, CarParams.compact())
 	_park(compact)
 	var truck := _add_car(0, -200, PI / 2.0, CarParams.truck())
 	truck.input = CarInput.make(1.0, 0.0)
 	_run(2.5)
 	assert_gt(compact.state.position.y, 30.0)
-	assert_eq(compact.state.heading, 0.0)
+	assert_almost_eq(compact.state.heading, 0.0, 0.001)
+
+
+func test_off_center_push_spins_car() -> void:
+	var compact := _add_car(0, 0, 0.0, CarParams.compact())
+	_park(compact)
+	var truck := _add_car(30, -200, PI / 2.0, CarParams.truck())
+	truck.input = CarInput.make(1.0, 0.0)
+	_run(2.5)
+	assert_gt(compact.state.heading, 0.05)

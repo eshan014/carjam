@@ -26,12 +26,13 @@ static func step(state: CarState, input: CarInput, params: CarParams, dt: float)
 		speed += throttle * rate * dt
 	next.speed = clampf(speed, -params.max_reverse_speed, params.max_speed)
 
-	# Sideways slide (from pushes) fades as the tires grip.
+	# Sideways slide and impact spin (from pushes) fade as the tires grip.
 	next.slide = state.slide.move_toward(Vector2.ZERO, params.lateral_grip * dt)
+	next.spin = move_toward(state.spin, 0.0, params.spin_grip * dt)
 
 	# Turning scales with speed, so a stopped car cannot rotate.
 	var turn_rate := next.speed / params.wheelbase * tan(next.steer)
-	next.heading = state.heading + turn_rate * dt
+	next.heading = state.heading + (turn_rate + state.spin) * dt
 	var forward := Vector2.from_angle(next.heading) * next.speed
 	next.position = state.position + (forward + state.slide) * dt
 	return next
